@@ -157,3 +157,24 @@ class esm_class_incoming(esm_class):
         # Short Message contains Intermediate Delivery Notification
         INTERMEDIATE         = 0b1000
         # All other values are reserved
+
+
+class NPI(enum.Enum):
+    """Numeric Plan Indicators (NPI) according to chapter 5.2.6"""
+    UNKNOWN       = 0b00000000
+    # ISDN (E163/E164)
+    ISDN          = 0b00000001
+    # Data (X.121)
+    DATA          = 0b00000011
+    # Telex (F.69)
+    TELEX         = 0b00000100
+    # Land Mobile (E.212)
+    LAND_MOBILE   = 0b00000110
+    NATIONAL      = 0b00001000
+    PRIVATE       = 0b00001001
+    ERMES         = 0b00001010
+    # Internet (IP)
+    INTERNET      = 0b00001110
+    # WAP Client Id (to be defined by WAP Forum)
+    WAP_CLIENT_ID = 0b00010010
+    # All other values are reserved
