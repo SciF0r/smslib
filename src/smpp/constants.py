@@ -178,3 +178,15 @@ class NPI(enum.Enum):
     # WAP Client Id (to be defined by WAP Forum)
     WAP_CLIENT_ID = 0b00010010
     # All other values are reserved
+
+
+class TON(enum.Enum):
+    """Type of Number (TON) according to chapter 5.2.5"""
+    UNKNOWN           = 0b00000000
+    INTERNATIONAL     = 0b00000001
+    NATIONAL          = 0b00000010
+    NETWORK_SPECIFIC  = 0b00000011
+    SUBSCRIBER_NUMBER = 0b00000100
+    ALPHANUMERIC      = 0b00000101
+    ABBREVIATED       = 0b00000110
+    # All other values are reserved
