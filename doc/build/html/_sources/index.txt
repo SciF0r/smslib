@@ -20,3 +20,8 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+
+Modules and classes
+===================
+.. automodule:: .
+   :members:
