@@ -2,12 +2,17 @@
 # -*- coding: UTF-8 -*-
 # vim: autoindent expandtab tabstop=4 sw=4 sts=4 filetype=python
 
-"""Constants for SMPP"""
+"""Constants for SMPP
+
+Because of the complexity of some fields and the need for reverse lookups, the
+choice fell to using classes based on enum.Enum. Sometimes fields are composed
+of subfields.
+"""
 
 import enum
 
 
-class data_coding(enum.Enum):
+class DataCoding(enum.Enum):
     """data_coding according to chapter 5.2.19"""
     # SMSC Default Alphabet
     DEFAULT       = 0b00000000
@@ -42,7 +47,7 @@ class data_coding(enum.Enum):
     # All other values are reserved
 
 
-class esm_class(object):
+class ESMClass(object):
     """esm_class according to chapter 5.2.12
 
     The esm_class field consists of three parts:
@@ -50,28 +55,33 @@ class esm_class(object):
     - Type
     - Feature
     The signification of Mode and Type depends on the direction the PDU is
-    sent. Thank you balu on stackoverflow.com for the help.
+    sent (SMSC<->ESME). Thank you balu on stackoverflow.com for the help.
     See http://stackoverflow.com/questions/24957795/
     """
+
+    # esm_class is ccbbbbaa, with
+    # - aa being the mode,
+    # - bbbb being the type and
+    # - cc being the feature.
     BITMASK_MODE    = 0b00000011
     BITMASK_TYPE    = 0b00111100
     BITMASK_FEATURE = 0b11000000
 
-    class Modes(enum.Enum):
+    class Mode(enum.Enum):
         """Messaging Mode (bits 1-0)
 
         Depends on the direction (ESME<->SMSC)
         """
         pass
 
-    class Types(enum.Enum):
+    class Type(enum.Enum):
         """Message Type (bits 5-2)
 
         Depends on the direction (ESME<->SMSC)
         """
         pass
 
-    class Features(enum.Enum):
+    class Feature(enum.Enum):
         """GSM Network specific features (bits 7-6)"""
         # No specific features selected
         NONE                = 0b00
@@ -88,8 +98,10 @@ class esm_class(object):
         self.feature = feature
 
     def __bytes__(self):
-        """Use this to write an instance of esm_class to a file-like object or
-        stream, e.g..: mysocket.send(bytes(my_esm_class_obj))
+        """Bytes representation of the class
+
+        Use this to write an instance of ESMClass to a file-like object or
+        stream, e.g.: mysocket.send(bytes(my_esm_class_obj))
         """
         return ((self.feature << 6) | (self.type << 2) | self.mode).to_bytes(
             1,
@@ -98,9 +110,9 @@ class esm_class(object):
 
     @classmethod
     def parse(cls, filelike):
-        """Use this to parse incoming data from a file-like object and create
-        an instance of esm_class accordingly, e.g:
-        my_esm_class_obj = esm_class.parse(stream)
+        """Parse incoming data from a file-like object
+
+        E.g.: my_esm_class_obj = ESMClass.parse(stream)
         """
         data = filelike.read(1)
         mode = int.from_bytes((data & cls.BITMASK_MODE))
@@ -109,9 +121,9 @@ class esm_class(object):
         return cls(type_, mode, feature)
 
 
-class esm_class_outgoing(esm_class):
+class ESMClassOutgoing(ESMClass):
     """For submit_sm, submit_multi and data_sm (ESME->SMSC)"""
-    class Modes(esm_class.Modes):
+    class Modes(ESMClass.Modes):
         """Messaging Mode (bits 1-0)"""
         # Default SMSC Mode (e.g. Store and Forward)
         DEFAULT           = 0b00
@@ -122,7 +134,7 @@ class esm_class_outgoing(esm_class):
         # Store and Forward mode
         STORE_AND_FORWARD = 0b11
 
-    class Types(esm_class.Types):
+    class Types(ESMClass.Types):
         """Message Type (bits 5-2)"""
         # Default message Type (i.e. normal message)
         DEFAULT           = 0b0000
@@ -133,16 +145,16 @@ class esm_class_outgoing(esm_class):
         # All other values are reserved
 
 
-class esm_class_incoming(esm_class):
+class ESMClassIncoming(ESMClass):
     """For deliver_sm and data_sm (SMSC->ESME)"""
-    class Modes(esm_class.Modes):
+    class Modes(ESMClass.Modes):
         """Messaging Mode (bits 1-0)
 
         Not applicable - ignore bits 0 and 1
         """
         pass
 
-    class Types(esm_class.Types):
+    class Types(ESMClass.Types):
         """Message Type (bits 5-2)"""
         # Default message Type (i.e. normal message)
         DEFAULT              = 0b0000
